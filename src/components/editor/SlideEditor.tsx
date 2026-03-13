@@ -6,17 +6,22 @@ import { uploadMedia } from "@/lib/storage";
 
 const GOOGLE_FONTS = [
   { label: "기본 (System)", value: "sans-serif" },
+  { label: "Noto Sans KR", value: "Noto Sans KR" },
+  { label: "Noto Serif KR", value: "Noto Serif KR" },
+  { label: "Nanum Gothic", value: "Nanum Gothic" },
+  { label: "Nanum Myeongjo", value: "Nanum Myeongjo" },
+  { label: "Black Han Sans", value: "Black Han Sans" },
+  { label: "Jua", value: "Jua" },
+  { label: "Do Hyeon", value: "Do Hyeon" },
+  { label: "Gowun Dodum", value: "Gowun Dodum" },
+  { label: "Yeon Sung", value: "Yeon Sung" },
+  { label: "Dongle", value: "Dongle" },
+  { label: "Gamja Flower", value: "Gamja Flower" },
+  { label: "Hahmlet", value: "Hahmlet" },
   { label: "Roboto", value: "Roboto" },
   { label: "Open Sans", value: "Open Sans" },
   { label: "Oswald", value: "Oswald" },
   { label: "Montserrat", value: "Montserrat" },
-  { label: "Anton", value: "Anton" },
-  { label: "Bebas Neue", value: "Bebas Neue" },
-  { label: "Noto Sans KR", value: "Noto Sans KR" },
-  { label: "Nanum Gothic", value: "Nanum Gothic" },
-  { label: "Nanum Myeongjo", value: "Nanum Myeongjo" },
-  { label: "Black Han Sans", value: "Black Han Sans" },
-  { label: "Noto Serif KR", value: "Noto Serif KR" },
 ];
 
 function useGoogleFont(fontFamily: string) {
@@ -233,6 +238,7 @@ export default function SlideEditor({ slide, screenId, onChange }: SlideEditorPr
               onChange={(e) => updateText({ text: e.target.value })}
               rows={3}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none"
+              style={{ fontFamily: slide.textScroll.fontFamily ?? "sans-serif" }}
             />
           </div>
 

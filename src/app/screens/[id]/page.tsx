@@ -273,6 +273,7 @@ function SlidePreview({ slide, screen }: { slide: Slide; screen: Screen }) {
             backgroundColor={slide.textScroll.backgroundColor}
             fontSize={slide.textScroll.fontSize * scale}
             scrollSpeed={slide.textScroll.scrollSpeed * scale}
+            fontFamily={slide.textScroll.fontFamily}
           />
         )}
       </div>
