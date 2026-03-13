@@ -22,8 +22,14 @@ export default function NewScreenPage() {
   const handleCreate = async () => {
     if (!name.trim()) return;
     setCreating(true);
-    const screen = await createScreen(name.trim(), width, height);
-    router.push(`/screens/${screen.id}`);
+    try {
+      const screen = await createScreen(name.trim(), width, height);
+      router.push(`/screens/${screen.id}`);
+    } catch (err) {
+      console.error("스크린 생성 실패:", err);
+      alert("스크린 생성에 실패했습니다. 콘솔을 확인해주세요.");
+      setCreating(false);
+    }
   };
 
   return (
