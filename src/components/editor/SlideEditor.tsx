@@ -1,8 +1,36 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Slide, TextScrollConfig } from "@/types";
 import { uploadMedia } from "@/lib/storage";
+
+const GOOGLE_FONTS = [
+  { label: "기본 (System)", value: "sans-serif" },
+  { label: "Roboto", value: "Roboto" },
+  { label: "Open Sans", value: "Open Sans" },
+  { label: "Oswald", value: "Oswald" },
+  { label: "Montserrat", value: "Montserrat" },
+  { label: "Anton", value: "Anton" },
+  { label: "Bebas Neue", value: "Bebas Neue" },
+  { label: "Noto Sans KR", value: "Noto Sans KR" },
+  { label: "Nanum Gothic", value: "Nanum Gothic" },
+  { label: "Nanum Myeongjo", value: "Nanum Myeongjo" },
+  { label: "Black Han Sans", value: "Black Han Sans" },
+  { label: "Noto Serif KR", value: "Noto Serif KR" },
+];
+
+function useGoogleFont(fontFamily: string) {
+  useEffect(() => {
+    if (!fontFamily || fontFamily === "sans-serif") return;
+    const fontId = `google-font-${fontFamily.replace(/\s+/g, "-")}`;
+    if (document.getElementById(fontId)) return;
+    const link = document.createElement("link");
+    link.id = fontId;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, "+")}:wght@400;700&display=swap`;
+    document.head.appendChild(link);
+  }, [fontFamily]);
+}
 
 interface SlideEditorProps {
   slide: Slide;
@@ -14,6 +42,23 @@ export default function SlideEditor({ slide, screenId, onChange }: SlideEditorPr
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Preload all Google Fonts for the dropdown preview
+  useEffect(() => {
+    GOOGLE_FONTS.forEach(({ value }) => {
+      if (value === "sans-serif") return;
+      const fontId = `google-font-${value.replace(/\s+/g, "-")}`;
+      if (document.getElementById(fontId)) return;
+      const link = document.createElement("link");
+      link.id = fontId;
+      link.rel = "stylesheet";
+      link.href = `https://fonts.googleapis.com/css2?family=${value.replace(/\s+/g, "+")}:wght@400;700&display=swap`;
+      document.head.appendChild(link);
+    });
+  }, []);
+
+  // Keep current slide's font loaded
+  useGoogleFont(slide.textScroll?.fontFamily ?? "sans-serif");
 
   const update = (partial: Partial<Slide>) => onChange({ ...slide, ...partial });
   const updateText = (partial: Partial<TextScrollConfig>) =>
@@ -189,6 +234,23 @@ export default function SlideEditor({ slide, screenId, onChange }: SlideEditorPr
               rows={3}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none"
             />
+          </div>
+
+          {/* Font family */}
+          <div>
+            <label className="block text-xs text-white/40 mb-1">폰트</label>
+            <select
+              value={slide.textScroll.fontFamily ?? "sans-serif"}
+              onChange={(e) => updateText({ fontFamily: e.target.value })}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              style={{ fontFamily: slide.textScroll.fontFamily ?? "sans-serif" }}
+            >
+              {GOOGLE_FONTS.map(({ label, value }) => (
+                <option key={value} value={value} style={{ fontFamily: value }}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Font size + speed */}

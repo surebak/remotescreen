@@ -91,6 +91,7 @@ export function newSlide(type: Slide["type"], order: number): Slide {
       backgroundColor: "#000000",
       fontSize: 48,
       scrollSpeed: 80,
+      fontFamily: "Noto Sans KR",
     };
   }
   return base;
