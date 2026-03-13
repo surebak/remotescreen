@@ -12,6 +12,55 @@ export default function ViewPage() {
   const [screen, setScreen] = useState<Screen | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wakeLockRef = useRef<any>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        wakeLockRef.current.addEventListener('release', () => {
+          console.log('Wake Lock released');
+        });
+        console.log('Wake Lock acquired');
+      }
+    } catch (err) {
+      console.error(`Wake Lock error: ${err}`);
+    }
+  };
+
+  const handleInteraction = async () => {
+    setHasInteracted(true);
+    try {
+      if (!document.fullscreenElement) {
+        const docEl = document.documentElement as any;
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen();
+        }
+      }
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
+    await requestWakeLock();
+  };
+
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && document.fullscreenElement) {
+        await requestWakeLock();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(console.error);
+        wakeLockRef.current = null;
+      }
+    };
+  }, []);
 
   // Real-time listener: only updates when published changes
   useEffect(() => {
@@ -68,13 +117,32 @@ export default function ViewPage() {
 
   return (
     <div
+      onClick={handleInteraction}
       style={{
         position: "fixed",
         inset: 0,
         background: "#000",
         overflow: "hidden",
+        cursor: "pointer",
       }}
+      title="클릭하여 전체 화면 및 화면 꺼짐 방지 설정"
     >
+      {!hasInteracted && (
+        <div style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          zIndex: 9999,
+          background: "rgba(0,0,0,0.5)",
+          color: "rgba(255,255,255,0.7)",
+          padding: "8px 16px",
+          borderRadius: 8,
+          fontSize: "14px",
+          pointerEvents: "none",
+        }}>
+          💡 한 번 터치(클릭)하면 전체 화면이 되고 화면이 꺼지지 않습니다.
+        </div>
+      )}
       <div
         style={{
           position: "absolute",
