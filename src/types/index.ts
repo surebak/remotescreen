@@ -28,6 +28,7 @@ export interface PublishedContent {
 
 export interface Screen {
   id: string;
+  userId: string;
   name: string;
   width: number;
   height: number;

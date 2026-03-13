@@ -8,10 +8,12 @@ import { Screen, Slide } from "@/types";
 import SlidePanel from "@/components/editor/SlidePanel";
 import SlideEditor from "@/components/editor/SlideEditor";
 import TextScroll from "@/components/TextScroll";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ScreenEditorPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [screen, setScreen] = useState<Screen | null>(null);
   const [selectedSlideId, setSelectedSlideId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -19,13 +21,15 @@ export default function ScreenEditorPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) { router.push("/"); return; }
     getScreen(id).then((s) => {
-      if (!s) { router.push("/"); return; }
+      if (!s || s.userId !== user.uid) { router.push("/"); return; }
       setScreen(s);
       if (s.slides.length > 0) setSelectedSlideId(s.slides[0].id);
       setLoading(false);
     });
-  }, [id, router]);
+  }, [id, router, user, authLoading]);
 
   const save = useCallback(
     async (updatedScreen: Screen) => {

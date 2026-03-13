@@ -8,6 +8,7 @@ import {
   deleteDoc,
   query,
   orderBy,
+  where,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { Screen, PublishedContent, Slide } from "@/types";
@@ -15,8 +16,12 @@ import { v4 as uuidv4 } from "uuid";
 
 const SCREENS = "screens";
 
-export async function getScreens(): Promise<Screen[]> {
-  const q = query(collection(db, SCREENS), orderBy("createdAt", "desc"));
+export async function getScreens(userId: string): Promise<Screen[]> {
+  const q = query(
+    collection(db, SCREENS),
+    where("userId", "==", userId),
+    orderBy("createdAt", "desc")
+  );
   const snap = await getDocs(q);
   return snap.docs.map((d) => d.data() as Screen);
 }
@@ -27,6 +32,7 @@ export async function getScreen(id: string): Promise<Screen | null> {
 }
 
 export async function createScreen(
+  userId: string,
   name: string,
   width: number,
   height: number
@@ -35,6 +41,7 @@ export async function createScreen(
   const now = Date.now();
   const screen: Screen = {
     id,
+    userId,
     name,
     width,
     height,
@@ -49,7 +56,7 @@ export async function createScreen(
 
 export async function updateScreen(
   id: string,
-  data: Partial<Omit<Screen, "id" | "createdAt">>
+  data: Partial<Omit<Screen, "id" | "userId" | "createdAt">>
 ): Promise<void> {
   await updateDoc(doc(db, SCREENS, id), { ...data, updatedAt: Date.now() });
 }

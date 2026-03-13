@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createScreen } from "@/lib/firestore";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PRESETS = [
   { label: "Full HD (1920×1080)", w: 1920, h: 1080 },
@@ -14,16 +15,23 @@ const PRESETS = [
 
 export default function NewScreenPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [name, setName] = useState("");
   const [width, setWidth] = useState(1920);
   const [height, setHeight] = useState(1080);
   const [creating, setCreating] = useState(false);
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/");
+    }
+  }, [user, authLoading, router]);
+
   const handleCreate = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || !user) return;
     setCreating(true);
     try {
-      const screen = await createScreen(name.trim(), width, height);
+      const screen = await createScreen(user.uid, name.trim(), width, height);
       router.push(`/screens/${screen.id}`);
     } catch (err) {
       console.error("스크린 생성 실패:", err);
@@ -31,6 +39,14 @@ export default function NewScreenPage() {
       setCreating(false);
     }
   };
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center text-white/40 text-sm">
+        로딩 중...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
