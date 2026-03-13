@@ -7,7 +7,6 @@ import {
   updateDoc,
   deleteDoc,
   query,
-  orderBy,
   where,
 } from "firebase/firestore";
 import { db } from "./firebase";
@@ -17,13 +16,10 @@ import { v4 as uuidv4 } from "uuid";
 const SCREENS = "screens";
 
 export async function getScreens(userId: string): Promise<Screen[]> {
-  const q = query(
-    collection(db, SCREENS),
-    where("userId", "==", userId),
-    orderBy("createdAt", "desc")
-  );
+  const q = query(collection(db, SCREENS), where("userId", "==", userId));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => d.data() as Screen);
+  const screens = snap.docs.map((d) => d.data() as Screen);
+  return screens.sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export async function getScreen(id: string): Promise<Screen | null> {
