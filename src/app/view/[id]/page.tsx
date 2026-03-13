@@ -46,7 +46,10 @@ export default function ViewPage() {
 
   if (!screen) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white/30 text-sm">
+      <div
+        style={{ position: "fixed", inset: 0, background: "#000", display: "grid", placeItems: "center" }}
+        className="text-white/30 text-sm"
+      >
         Loading...
       </div>
     );
@@ -54,21 +57,33 @@ export default function ViewPage() {
 
   if (!screen.published || slides.length === 0) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white/30 text-sm">
+      <div
+        style={{ position: "fixed", inset: 0, background: "#000", display: "grid", placeItems: "center" }}
+        className="text-white/30 text-sm"
+      >
         게시된 콘텐츠가 없습니다
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "#000",
+        overflow: "hidden",
+      }}
+    >
       <div
         style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           width: screen.width,
           height: screen.height,
-          position: "relative",
           overflow: "hidden",
-          flexShrink: 0,
         }}
       >
         {currentSlide && <SlideRenderer slide={currentSlide} onVideoEnd={advance} />}
