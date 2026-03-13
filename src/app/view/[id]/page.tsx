@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Screen, Slide } from "@/types";
+import TextScroll from "@/components/TextScroll";
 
 export default function ViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -122,17 +123,7 @@ function SlideRenderer({
   }
 
   if (slide.type === "text-scroll" && slide.textScroll) {
-    const { text, textColor, backgroundColor, fontSize, scrollSpeed } = slide.textScroll;
-
-    return (
-      <TextScroll
-        text={text}
-        textColor={textColor}
-        backgroundColor={backgroundColor}
-        fontSize={fontSize}
-        scrollSpeed={scrollSpeed}
-      />
-    );
+    return <TextScroll {...slide.textScroll} />;
   }
 
   return (
@@ -153,64 +144,3 @@ function SlideRenderer({
   );
 }
 
-function TextScroll({
-  text,
-  textColor,
-  backgroundColor,
-  fontSize,
-  scrollSpeed,
-}: {
-  text: string;
-  textColor: string;
-  backgroundColor: string;
-  fontSize: number;
-  scrollSpeed: number;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
-  const [duration, setDuration] = useState(10);
-  const [textWidth, setTextWidth] = useState(0);
-
-  useEffect(() => {
-    if (!textRef.current || !containerRef.current) return;
-    const tw = textRef.current.scrollWidth;
-    const cw = containerRef.current.offsetWidth;
-    setTextWidth(tw);
-    // Duration = time to traverse (text width + container width) at scrollSpeed px/s
-    const totalDistance = tw + cw;
-    setDuration(totalDistance / scrollSpeed);
-  }, [text, fontSize, scrollSpeed]);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        position: "absolute",
-        inset: 0,
-        backgroundColor,
-        display: "flex",
-        alignItems: "center",
-        overflow: "hidden",
-      }}
-    >
-      <p
-        ref={textRef}
-        style={{
-          color: textColor,
-          fontSize,
-          whiteSpace: "nowrap",
-          willChange: "transform",
-          animation: textWidth > 0 ? `scrollText ${duration}s linear infinite` : "none",
-        }}
-      >
-        {text}
-      </p>
-      <style>{`
-        @keyframes scrollText {
-          0%   { transform: translateX(100vw); }
-          100% { transform: translateX(-${textWidth}px); }
-        }
-      `}</style>
-    </div>
-  );
-}

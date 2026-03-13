@@ -7,6 +7,7 @@ import { getScreen, updateScreen, publishScreen, newSlide } from "@/lib/firestor
 import { Screen, Slide } from "@/types";
 import SlidePanel from "@/components/editor/SlidePanel";
 import SlideEditor from "@/components/editor/SlideEditor";
+import TextScroll from "@/components/TextScroll";
 
 export default function ScreenEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -262,23 +263,13 @@ function SlidePreview({ slide, screen }: { slide: Slide; screen: Screen }) {
           </div>
         )}
         {slide.type === "text-scroll" && slide.textScroll && (
-          <div
-            className="absolute inset-0 flex items-center overflow-hidden"
-            style={{ backgroundColor: slide.textScroll.backgroundColor }}
-          >
-            <p
-              className="whitespace-nowrap"
-              style={{
-                color: slide.textScroll.textColor,
-                fontSize: slide.textScroll.fontSize * scale,
-                animation: "marquee 8s linear infinite",
-                paddingLeft: "100%",
-              }}
-            >
-              {slide.textScroll.text}
-            </p>
-            <style>{`@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-200%); } }`}</style>
-          </div>
+          <TextScroll
+            text={slide.textScroll.text}
+            textColor={slide.textScroll.textColor}
+            backgroundColor={slide.textScroll.backgroundColor}
+            fontSize={slide.textScroll.fontSize * scale}
+            scrollSpeed={slide.textScroll.scrollSpeed * scale}
+          />
         )}
       </div>
     </div>

@@ -247,21 +247,7 @@ export default function SlideEditor({ slide, screenId, onChange }: SlideEditorPr
             </div>
           </div>
 
-          {/* Preview */}
-          <div
-            className="rounded-lg overflow-hidden h-16 flex items-center"
-            style={{ backgroundColor: slide.textScroll.backgroundColor }}
-          >
-            <p
-              className="whitespace-nowrap px-4 animate-pulse"
-              style={{
-                color: slide.textScroll.textColor,
-                fontSize: Math.min(slide.textScroll.fontSize, 48),
-              }}
-            >
-              {slide.textScroll.text || "미리보기"}
-            </p>
-          </div>
+
         </section>
       )}
     </div>
