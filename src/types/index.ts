@@ -6,6 +6,7 @@ export interface TextScrollConfig {
   backgroundColor: string;
   fontSize: number; // px
   scrollSpeed: number; // px per second
+  fontFamily?: string; // Google Fonts family name, e.g. "Noto Sans KR"
 }
 
 export interface Slide {
