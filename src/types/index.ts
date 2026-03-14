@@ -14,6 +14,9 @@ export interface Slide {
   order: number;
   type: MediaType;
   duration: number | null; // seconds; null = show forever until next publish
+  offsetX?: number;
+  offsetY?: number;
+  scale?: number; // percent, default 100
   // image / video
   mediaUrl?: string;
   mediaStoragePath?: string; // for deletion from storage

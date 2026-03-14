@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getScreen, updateScreen, publishScreen, newSlide } from "@/lib/firestore";
@@ -19,6 +19,8 @@ export default function ScreenEditorPage() {
   const [saving, setSaving] = useState(false);
   const [saveLabel, setSaveLabel] = useState("");
   const [loading, setLoading] = useState(true);
+  const [canvasPopover, setCanvasPopover] = useState(false);
+  const canvasPopoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -30,6 +32,18 @@ export default function ScreenEditorPage() {
       setLoading(false);
     });
   }, [id, router, user, authLoading]);
+
+  // Close popover on outside click
+  useEffect(() => {
+    if (!canvasPopover) return;
+    const handler = (e: MouseEvent) => {
+      if (canvasPopoverRef.current && !canvasPopoverRef.current.contains(e.target as Node)) {
+        setCanvasPopover(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [canvasPopover]);
 
   const save = useCallback(
     async (updatedScreen: Screen) => {
@@ -142,9 +156,49 @@ export default function ScreenEditorPage() {
             onBlur={() => save(screen)}
             className="bg-transparent text-sm font-semibold focus:outline-none border-b border-transparent focus:border-white/30 truncate max-w-xs"
           />
-          <span className="text-xs text-white/40">
-            {screen.width}×{screen.height}
-          </span>
+          {/* Canvas settings popover */}
+          <div className="relative" ref={canvasPopoverRef}>
+            <button
+              onClick={() => setCanvasPopover((v) => !v)}
+              className="text-xs text-white/40 hover:text-white/70 transition-colors px-1 rounded"
+              title="캔버스 크기 설정"
+            >
+              {screen.width}×{screen.height}
+            </button>
+            {canvasPopover && (
+              <div className="absolute top-full left-0 mt-1 z-50 bg-[#1e1e1e] border border-white/15 rounded-lg p-4 shadow-xl w-48">
+                <p className="text-xs font-semibold text-white/60 mb-3">캔버스 크기</p>
+                <div className="space-y-2">
+                  <label className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-white/50 w-16 shrink-0">너비 (px)</span>
+                    <input
+                      type="number"
+                      value={screen.width}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value) || screen.width;
+                        setScreen({ ...screen, width: v });
+                      }}
+                      onBlur={() => save(screen)}
+                      className="w-full bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-white/30"
+                    />
+                  </label>
+                  <label className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-white/50 w-16 shrink-0">높이 (px)</span>
+                    <input
+                      type="number"
+                      value={screen.height}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value) || screen.height;
+                        setScreen({ ...screen, height: v });
+                      }}
+                      onBlur={() => save(screen)}
+                      className="w-full bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-white/30"
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -228,54 +282,73 @@ export default function ScreenEditorPage() {
 function SlidePreview({ slide, screen }: { slide: Slide; screen: Screen }) {
   // Scale to fit in the preview area (max ~600px wide)
   const maxW = 600;
-  const scale = Math.min(maxW / screen.width, 400 / screen.height, 1);
-  const w = Math.round(screen.width * scale);
-  const h = Math.round(screen.height * scale);
+  const previewRatio = Math.min(maxW / screen.width, 400 / screen.height, 1);
+  const w = Math.round(screen.width * previewRatio);
+  const h = Math.round(screen.height * previewRatio);
+
+  const slideScale = (slide.scale ?? 100) / 100;
+  const offsetX = (slide.offsetX ?? 0) * previewRatio;
+  const offsetY = (slide.offsetY ?? 0) * previewRatio;
+  const hasTransform = (slide.scale ?? 100) !== 100 || offsetX !== 0 || offsetY !== 0;
 
   return (
     <div>
       <p className="text-xs text-white/30 text-center mb-2">
         {screen.width}×{screen.height}px 미리보기
+        {hasTransform && (
+          <span className="ml-2 text-yellow-400/60">
+            {slide.scale ?? 100}% · offset ({slide.offsetX ?? 0}, {slide.offsetY ?? 0})
+          </span>
+        )}
       </p>
       <div
         style={{ width: w, height: h }}
         className="relative overflow-hidden rounded-lg border border-white/10 bg-black"
       >
-        {slide.type === "image" && slide.mediaUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={slide.mediaUrl}
-            alt=""
-            className="absolute inset-0 w-full h-full object-contain"
-          />
-        )}
-        {slide.type === "image" && !slide.mediaUrl && (
-          <div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs">
-            이미지 없음
-          </div>
-        )}
-        {slide.type === "video" && slide.mediaUrl && (
-          <video
-            src={slide.mediaUrl}
-            className="absolute inset-0 w-full h-full object-contain"
-            controls
-          />
-        )}
-        {slide.type === "video" && !slide.mediaUrl && (
-          <div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs">
-            영상 없음
-          </div>
-        )}
-        {slide.type === "text-scroll" && slide.textScroll && (
-          <TextScroll
-            text={slide.textScroll.text}
-            textColor={slide.textScroll.textColor}
-            backgroundColor={slide.textScroll.backgroundColor}
-            fontSize={slide.textScroll.fontSize * scale}
-            scrollSpeed={slide.textScroll.scrollSpeed * scale}
-            fontFamily={slide.textScroll.fontFamily}
-          />
-        )}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: `translate(${offsetX}px, ${offsetY}px) scale(${slideScale})`,
+            transformOrigin: "center center",
+          }}
+        >
+          {slide.type === "image" && slide.mediaUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={slide.mediaUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+          )}
+          {slide.type === "image" && !slide.mediaUrl && (
+            <div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs">
+              이미지 없음
+            </div>
+          )}
+          {slide.type === "video" && slide.mediaUrl && (
+            <video
+              src={slide.mediaUrl}
+              className="absolute inset-0 w-full h-full object-contain"
+              controls
+            />
+          )}
+          {slide.type === "video" && !slide.mediaUrl && (
+            <div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs">
+              영상 없음
+            </div>
+          )}
+          {slide.type === "text-scroll" && slide.textScroll && (
+            <TextScroll
+              text={slide.textScroll.text}
+              textColor={slide.textScroll.textColor}
+              backgroundColor={slide.textScroll.backgroundColor}
+              fontSize={slide.textScroll.fontSize * previewRatio}
+              scrollSpeed={slide.textScroll.scrollSpeed * previewRatio}
+              fontFamily={slide.textScroll.fontFamily}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

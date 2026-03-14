@@ -148,13 +148,22 @@ export default function ViewPage() {
           position: "absolute",
           top: "50%",
           left: "50%",
-          transform: "translate(-50%, -50%)",
+          transform: `translate(calc(-50% + ${currentSlide?.offsetX ?? 0}px), calc(-50% + ${currentSlide?.offsetY ?? 0}px))`,
           width: screen.width,
           height: screen.height,
           overflow: "hidden",
         }}
       >
-        {currentSlide && <SlideRenderer slide={currentSlide} onVideoEnd={advance} />}
+        {currentSlide && (
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            transform: `scale(${(currentSlide.scale ?? 100) / 100})`,
+            transformOrigin: "center center",
+          }}>
+            <SlideRenderer slide={currentSlide} onVideoEnd={advance} />
+          </div>
+        )}
       </div>
     </div>
   );
