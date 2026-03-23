@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Slide, TextScrollConfig } from "@/types";
+import { Slide, TextScrollConfig, TextSpritzConfig } from "@/types";
 import { uploadMedia } from "@/lib/storage";
 
 const GOOGLE_FONTS = [
@@ -68,11 +68,13 @@ export default function SlideEditor({ slide, screenId, onChange }: SlideEditorPr
     });
   }, []);
 
-  useGoogleFont(slide.textScroll?.fontFamily ?? "sans-serif");
+  useGoogleFont(slide.textScroll?.fontFamily ?? slide.textSpritz?.fontFamily ?? "sans-serif");
 
   const update = (partial: Partial<Slide>) => onChange({ ...slide, ...partial });
   const updateText = (partial: Partial<TextScrollConfig>) =>
     onChange({ ...slide, textScroll: { ...slide.textScroll!, ...partial } });
+  const updateSpritz = (partial: Partial<TextSpritzConfig>) =>
+    onChange({ ...slide, textSpritz: { ...slide.textSpritz!, ...partial } });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -334,6 +336,98 @@ export default function SlideEditor({ slide, screenId, onChange }: SlideEditorPr
                   )}
                 </button>
               )}
+            </section>
+          )}
+
+          {/* Text spritz */}
+          {slide.type === "text-spritz" && slide.textSpritz && (
+            <section className="flex flex-col gap-4">
+              <label className="block text-xs text-white/50 uppercase tracking-wider">스프리츠 (Spritz)</label>
+
+              <div>
+                <label className="block text-xs text-white/40 mb-1">텍스트 내용</label>
+                <textarea
+                  value={slide.textSpritz.text}
+                  onChange={(e) => updateSpritz({ text: e.target.value })}
+                  rows={4}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none"
+                  style={{ fontFamily: slide.textSpritz.fontFamily ?? "sans-serif" }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/40 mb-1">폰트</label>
+                <select
+                  value={slide.textSpritz.fontFamily ?? "sans-serif"}
+                  onChange={(e) => updateSpritz({ fontFamily: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  style={{ fontFamily: slide.textSpritz.fontFamily ?? "sans-serif" }}
+                >
+                  {GOOGLE_FONTS.map(({ label, value }) => (
+                    <option key={value} value={value} style={{ fontFamily: value }}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-white/40 mb-1">폰트 크기 (px)</label>
+                  <input
+                    type="number"
+                    min={12}
+                    max={500}
+                    value={slide.textSpritz.fontSize}
+                    onChange={(e) => updateSpritz({ fontSize: Number(e.target.value) })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1">속도 (글자/초)</label>
+                  <input
+                    type="number"
+                    min={0.5}
+                    max={30}
+                    step={0.5}
+                    value={slide.textSpritz.speed}
+                    onChange={(e) => updateSpritz({ speed: Number(e.target.value) })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-white/40 mb-1">텍스트 색상</label>
+                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+                    <input
+                      type="color"
+                      value={slide.textSpritz.textColor}
+                      onChange={(e) => updateSpritz({ textColor: e.target.value })}
+                      className="w-7 h-7 rounded cursor-pointer bg-transparent border-0"
+                    />
+                    <span className="text-xs text-white/50 font-mono">{slide.textSpritz.textColor}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1">배경 색상</label>
+                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+                    <input
+                      type="color"
+                      value={slide.textSpritz.backgroundColor}
+                      onChange={(e) => updateSpritz({ backgroundColor: e.target.value })}
+                      className="w-7 h-7 rounded cursor-pointer bg-transparent border-0"
+                    />
+                    <span className="text-xs text-white/50 font-mono">{slide.textSpritz.backgroundColor}</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-white/30">
+                한글은 한 글자씩, 영문은 단어 단위로 표시됩니다.
+                현재 {slide.textSpritz.speed}글자/초 = {Math.round(1000 / slide.textSpritz.speed)}ms/글자
+              </p>
             </section>
           )}
 

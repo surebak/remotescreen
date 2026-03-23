@@ -94,5 +94,15 @@ export function newSlide(type: Slide["type"], order: number): Slide {
       fontFamily: "Noto Sans KR",
     };
   }
+  if (type === "text-spritz") {
+    base.textSpritz = {
+      text: "텍스트를 입력하세요",
+      textColor: "#ffffff",
+      backgroundColor: "#000000",
+      fontSize: 120,
+      speed: 4,
+      fontFamily: "Noto Sans KR",
+    };
+  }
   return base;
 }

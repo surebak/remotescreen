@@ -16,12 +16,14 @@ const TYPE_LABEL: Record<Slide["type"], string> = {
   image: "🖼 이미지",
   video: "🎬 영상",
   "text-scroll": "📜 텍스트",
+  "text-spritz": "⚡ 스프리츠",
 };
 
 const TYPE_BG: Record<Slide["type"], string> = {
   image: "bg-purple-500/20 text-purple-300",
   video: "bg-orange-500/20 text-orange-300",
   "text-scroll": "bg-cyan-500/20 text-cyan-300",
+  "text-spritz": "bg-yellow-500/20 text-yellow-300",
 };
 
 export default function SlidePanel({
@@ -46,7 +48,7 @@ export default function SlidePanel({
         <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">슬라이드</p>
         {/* Add slide buttons */}
         <div className="flex flex-col gap-1">
-          {(["image", "video", "text-scroll"] as Slide["type"][]).map((t) => (
+          {(["image", "video", "text-scroll", "text-spritz"] as Slide["type"][]).map((t) => (
             <button
               key={t}
               onClick={() => onAdd(t)}

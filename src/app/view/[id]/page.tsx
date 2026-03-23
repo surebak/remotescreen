@@ -6,6 +6,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Screen, Slide } from "@/types";
 import TextScroll from "@/components/TextScroll";
+import TextSpritz from "@/components/TextSpritz";
 
 export default function ViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -216,6 +217,10 @@ function SlideRenderer({
 
   if (slide.type === "text-scroll" && slide.textScroll) {
     return <TextScroll {...slide.textScroll} />;
+  }
+
+  if (slide.type === "text-spritz" && slide.textSpritz) {
+    return <TextSpritz {...slide.textSpritz} />;
   }
 
   return (

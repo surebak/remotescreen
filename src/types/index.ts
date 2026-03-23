@@ -1,4 +1,4 @@
-export type MediaType = "image" | "video" | "text-scroll";
+export type MediaType = "image" | "video" | "text-scroll" | "text-spritz";
 
 export interface TextScrollConfig {
   text: string;
@@ -7,6 +7,15 @@ export interface TextScrollConfig {
   fontSize: number; // px
   scrollSpeed: number; // px per second
   fontFamily?: string; // Google Fonts family name, e.g. "Noto Sans KR"
+}
+
+export interface TextSpritzConfig {
+  text: string;
+  textColor: string;
+  backgroundColor: string;
+  fontSize: number; // px
+  speed: number; // tokens per second (한글=글자, 영문=단어)
+  fontFamily?: string;
 }
 
 export interface Slide {
@@ -22,6 +31,8 @@ export interface Slide {
   mediaStoragePath?: string; // for deletion from storage
   // text-scroll
   textScroll?: TextScrollConfig;
+  // text-spritz
+  textSpritz?: TextSpritzConfig;
 }
 
 export interface PublishedContent {
