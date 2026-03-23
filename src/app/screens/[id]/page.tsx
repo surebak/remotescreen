@@ -21,6 +21,7 @@ export default function ScreenEditorPage() {
   const [loading, setLoading] = useState(true);
   const [canvasPopover, setCanvasPopover] = useState(false);
   const canvasPopoverRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<Screen | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -38,12 +39,13 @@ export default function ScreenEditorPage() {
     if (!canvasPopover) return;
     const handler = (e: MouseEvent) => {
       if (canvasPopoverRef.current && !canvasPopoverRef.current.contains(e.target as Node)) {
+        if (screenRef.current) save(screenRef.current);
         setCanvasPopover(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [canvasPopover]);
+  }, [canvasPopover]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const save = useCallback(
     async (updatedScreen: Screen) => {
@@ -137,6 +139,8 @@ export default function ScreenEditorPage() {
     );
   }
 
+  screenRef.current = screen;
+
   if (!screen) return null;
 
   return (
@@ -159,7 +163,10 @@ export default function ScreenEditorPage() {
           {/* Canvas settings popover */}
           <div className="relative" ref={canvasPopoverRef}>
             <button
-              onClick={() => setCanvasPopover((v) => !v)}
+              onClick={() => {
+                if (canvasPopover && screenRef.current) save(screenRef.current);
+                setCanvasPopover((v) => !v);
+              }}
               className="text-xs text-white/40 hover:text-white/70 transition-colors px-1 rounded"
               title="캔버스 크기 설정"
             >
