@@ -8,6 +8,7 @@ import { Screen, Slide } from "@/types";
 import SlidePanel from "@/components/editor/SlidePanel";
 import SlideEditor from "@/components/editor/SlideEditor";
 import TextScroll from "@/components/TextScroll";
+import TextSpritz from "@/components/TextSpritz";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ScreenEditorPage() {
@@ -346,6 +347,16 @@ function SlidePreview({ slide, screen }: { slide: Slide; screen: Screen }) {
               fontSize={slide.textScroll.fontSize * previewRatio}
               scrollSpeed={slide.textScroll.scrollSpeed * previewRatio}
               fontFamily={slide.textScroll.fontFamily}
+            />
+          )}
+          {slide.type === "text-spritz" && slide.textSpritz && (
+            <TextSpritz
+              text={slide.textSpritz.text}
+              textColor={slide.textSpritz.textColor}
+              backgroundColor={slide.textSpritz.backgroundColor}
+              fontSize={slide.textSpritz.fontSize * previewRatio}
+              speed={slide.textSpritz.speed}
+              fontFamily={slide.textSpritz.fontFamily}
             />
           )}
         </div>
